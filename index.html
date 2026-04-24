@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PropScan — NZ Property Due Diligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #FDF6EE;
+    --warm-white: #FFFCF8;
+    --terracotta: #C85A2A;
+    --terracotta-light: #F5EAE3;
+    --terracotta-mid: #E8A882;
+    --sage: #4A7C5C;
+    --sage-light: #E8F2EC;
+    --amber: #D4862A;
+    --amber-light: #FDF0DC;
+    --red: #B83232;
+    --red-light: #FDEAEA;
+    --text-dark: #2C2416;
+    --text-mid: #6B5A47;
+    --text-light: #9E8E7E;
+    --border: #E8DDD2;
+    --shadow: rgba(44,36,22,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text-dark);
+    min-height: 100vh;
+  }
+
+  /* NAV */
+  nav {
+    background: var(--warm-white);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    font-family: 'Fraunces', serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--terracotta);
+    letter-spacing: -0.02em;
+  }
+  .logo span { color: var(--text-dark); }
+  .nav-links { display: flex; gap: 2rem; align-items: center; }
+  .nav-links a { color: var(--text-mid); text-decoration: none; font-size: 0.9rem; }
+  .nav-cta {
+    background: var(--terracotta);
+    color: white;
+    border: none;
+    padding: 0.5rem 1.25rem;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  /* HERO */
+  .hero {
+    text-align: center;
+    padding: 5rem 2rem 3rem;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  .badge {
+    display: inline-block;
+    background: var(--terracotta-light);
+    color: var(--terracotta);
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 0.3rem 0.9rem;
+    border-radius: 20px;
+    margin-bottom: 1.5rem;
+  }
+  .hero h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(2.2rem, 5vw, 3.2rem);
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--text-dark);
+    margin-bottom: 1rem;
+  }
+  .hero h1 em { font-style: italic; color: var(--terracotta); }
+  .hero p {
+    color: var(--text-mid);
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+  .free-badge {
+    display: inline-block;
+    background: var(--sage-light);
+    color: var(--sage);
+    font-size: 0.85rem;
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    font-weight: 500;
+    margin-bottom: 2.5rem;
+  }
+
+  /* MAIN CARD */
+  .main-card {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    max-width: 760px;
+    margin: 0 auto 4rem;
+    overflow: hidden;
+    box-shadow: 0 4px 24px var(--shadow);
+  }
+
+  /* STEPS */
+  .steps {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: var(--cream);
+  }
+  .step {
+    flex: 1;
+    padding: 1rem;
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--text-light);
+    border-right: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .step:last-child { border-right: none; }
+  .step.active { background: var(--warm-white); color: var(--terracotta); font-weight: 500; }
+  .step.done { color: var(--sage); }
+  .step-num {
+    display: inline-flex;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--border);
+    color: var(--text-mid);
+    font-size: 0.75rem;
+    font-weight: 500;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.3rem;
+  }
+  .step.active .step-num { background: var(--terracotta); color: white; }
+  .step.done .step-num { background: var(--sage); color: white; }
+
+  /* PANELS */
+  .panel { display: none; padding: 2rem; }
+  .panel.active { display: block; }
+
+  /* UPLOAD AREA */
+  .upload-intro {
+    font-size: 1rem;
+    color: var(--text-mid);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+  }
+  .upload-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .upload-slot {
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--cream);
+    position: relative;
+  }
+  .upload-slot:hover { border-color: var(--terracotta-mid); background: var(--terracotta-light); }
+  .upload-slot.has-file { border-color: var(--sage); border-style: solid; background: var(--sage-light); }
+  .upload-slot input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .upload-icon { font-size: 1.8rem; margin-bottom: 0.5rem; }
+  .upload-label { font-size: 0.85rem; font-weight: 500; color: var(--text-dark); margin-bottom: 0.25rem; }
+  .upload-hint { font-size: 0.75rem; color: var(--text-light); }
+  .upload-slot.has-file .upload-hint { color: var(--sage); font-weight: 500; }
+
+  /* ADDRESS INPUT */
+  .input-group { margin-bottom: 1.25rem; }
+  .input-group label { display: block; font-size: 0.85rem; font-weight: 500; color: var(--text-mid); margin-bottom: 0.4rem; }
+  .input-group input, .input-group select, .input-group textarea {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    background: var(--warm-white);
+    color: var(--text-dark);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .input-group input:focus, .input-group textarea:focus {
+    border-color: var(--terracotta);
+  }
+
+  /* BUTTONS */
+  .btn-primary {
+    background: var(--terracotta);
+    color: white;
+    border: none;
+    padding: 0.8rem 2rem;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .btn-primary:hover { background: #B04E24; }
+  .btn-primary:active { transform: scale(0.99); }
+  .btn-primary:disabled { background: var(--border); color: var(--text-light); cursor: not-allowed; }
+  .btn-secondary {
+    background: transparent;
+    color: var(--terracotta);
+    border: 1.5px solid var(--terracotta);
+    padding: 0.7rem 1.5rem;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    margin-right: 0.75rem;
+  }
+
+  /* ANALYSIS PANEL */
+  .analysis-header {
+    background: linear-gradient(135deg, var(--terracotta-light), var(--amber-light));
+    border-bottom: 1px solid var(--border);
+    padding: 1.5rem 2rem;
+  }
+  .analysis-header h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.4rem;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+  }
+  .analysis-meta { font-size: 0.85rem; color: var(--text-mid); }
+
+  /* RISK METERS */
+  .risk-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+  .risk-card {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: center;
+  }
+  .risk-label { font-size: 0.75rem; color: var(--text-mid); margin-bottom: 0.5rem; font-weight: 500; }
+  .risk-score {
+    font-family: 'Fraunces', serif;
+    font-size: 1.8rem;
+    font-weight: 600;
+    line-height: 1;
+    margin-bottom: 0.3rem;
+  }
+  .risk-score.green { color: var(--sage); }
+  .risk-score.amber { color: var(--amber); }
+  .risk-score.red { color: var(--red); }
+  .risk-pill {
+    display: inline-block;
+    font-size: 0.7rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 10px;
+    font-weight: 500;
+  }
+  .pill-green { background: var(--sage-light); color: var(--sage); }
+  .pill-amber { background: var(--amber-light); color: var(--amber); }
+  .pill-red { background: var(--red-light); color: var(--red); }
+
+  /* VERDICT */
+  .verdict-box {
+    border-radius: 14px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1.5px solid;
+  }
+  .verdict-box.buy { border-color: var(--sage); background: var(--sage-light); }
+  .verdict-box.caution { border-color: var(--amber); background: var(--amber-light); }
+  .verdict-box.avoid { border-color: var(--red); background: var(--red-light); }
+  .verdict-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-bottom: 0.4rem;
+  }
+  .verdict-box.buy .verdict-title { color: var(--sage); }
+  .verdict-box.caution .verdict-title { color: var(--amber); }
+  .verdict-box.avoid .verdict-title { color: var(--red); }
+  .verdict-text { font-size: 0.9rem; color: var(--text-mid); line-height: 1.6; }
+
+  /* FINDINGS */
+  .findings-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+    color: var(--text-dark);
+  }
+  .finding {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.9rem 0;
+    border-bottom: 1px solid var(--border);
+    align-items: flex-start;
+  }
+  .finding:last-child { border-bottom: none; }
+  .finding-icon {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .icon-green { background: var(--sage-light); }
+  .icon-amber { background: var(--amber-light); }
+  .icon-red { background: var(--red-light); }
+  .finding-content { flex: 1; }
+  .finding-heading { font-size: 0.9rem; font-weight: 500; margin-bottom: 0.2rem; }
+  .finding-detail { font-size: 0.85rem; color: var(--text-mid); line-height: 1.5; }
+
+  /* CHAT */
+  .chat-area {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+  }
+  .chat-messages {
+    min-height: 200px;
+    max-height: 340px;
+    overflow-y: auto;
+    padding: 1rem;
+    background: var(--cream);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .msg {
+    max-width: 85%;
+    padding: 0.7rem 1rem;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    line-height: 1.55;
+  }
+  .msg-user {
+    background: var(--terracotta);
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+  }
+  .msg-ai {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    color: var(--text-dark);
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+  }
+  .msg-ai.loading { color: var(--text-light); font-style: italic; }
+  .chat-input-row {
+    display: flex;
+    border-top: 1px solid var(--border);
+    background: var(--warm-white);
+  }
+  .chat-input-row input {
+    flex: 1;
+    border: none;
+    padding: 0.8rem 1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    background: transparent;
+    color: var(--text-dark);
+    outline: none;
+  }
+  .chat-send {
+    background: var(--terracotta);
+    color: white;
+    border: none;
+    padding: 0 1.2rem;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: background 0.2s;
+  }
+  .chat-send:hover { background: #B04E24; }
+  .chat-send:disabled { background: var(--border); cursor: not-allowed; }
+
+  /* SUGGESTED Qs */
+  .suggested-qs { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
+  .sq-btn {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 0.35rem 0.85rem;
+    font-size: 0.8rem;
+    color: var(--text-mid);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+  }
+  .sq-btn:hover { border-color: var(--terracotta); color: var(--terracotta); background: var(--terracotta-light); }
+
+  /* LOADING */
+  .loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 3rem 2rem;
+    gap: 1rem;
+  }
+  .spinner {
+    width: 48px; height: 48px;
+    border: 3px solid var(--border);
+    border-top-color: var(--terracotta);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loader-text { font-size: 0.95rem; color: var(--text-mid); text-align: center; }
+  .loader-sub { font-size: 0.8rem; color: var(--text-light); }
+
+  /* FREE COUNTER */
+  .free-counter {
+    background: var(--sage-light);
+    border: 1px solid #A8D4B8;
+    border-radius: 10px;
+    padding: 0.7rem 1rem;
+    font-size: 0.85rem;
+    color: var(--sage);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .counter-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--sage); }
+
+  /* PAYWALL */
+  .paywall {
+    text-align: center;
+    padding: 2.5rem 2rem;
+    background: var(--cream);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+  .paywall h3 { font-family: 'Fraunces', serif; font-size: 1.4rem; margin-bottom: 0.5rem; }
+  .paywall p { color: var(--text-mid); font-size: 0.9rem; margin-bottom: 1.5rem; }
+  .price-cards { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+  .price-card {
+    background: var(--warm-white);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem;
+    min-width: 160px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .price-card:hover { border-color: var(--terracotta); }
+  .price-card.featured { border-color: var(--terracotta); background: var(--terracotta-light); }
+  .price-amount { font-family: 'Fraunces', serif; font-size: 1.8rem; font-weight: 600; color: var(--terracotta); }
+  .price-period { font-size: 0.75rem; color: var(--text-light); }
+  .price-desc { font-size: 0.82rem; color: var(--text-mid); margin-top: 0.4rem; }
+
+  /* HOW IT WORKS */
+  .how-section {
+    max-width: 760px;
+    margin: 0 auto 4rem;
+    padding: 0 2rem;
+  }
+  .how-section h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.8rem;
+    font-weight: 500;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .how-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1.5rem; }
+  .how-card {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem 1.25rem;
+    text-align: center;
+  }
+  .how-num {
+    font-family: 'Fraunces', serif;
+    font-size: 2rem;
+    color: var(--terracotta);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  .how-card h4 { font-size: 0.95rem; font-weight: 500; margin-bottom: 0.4rem; }
+  .how-card p { font-size: 0.82rem; color: var(--text-mid); line-height: 1.5; }
+
+  /* TESTIMONIAL */
+  .testimonial-section {
+    background: var(--terracotta-light);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 3rem 2rem;
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+  .testimonial-text {
+    font-family: 'Fraunces', serif;
+    font-size: 1.3rem;
+    font-style: italic;
+    color: var(--text-dark);
+    max-width: 520px;
+    margin: 0 auto 1rem;
+    line-height: 1.5;
+  }
+  .testimonial-author { font-size: 0.85rem; color: var(--text-mid); }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 2rem;
+    font-size: 0.8rem;
+    color: var(--text-light);
+    border-top: 1px solid var(--border);
+  }
+  footer strong { color: var(--text-mid); }
+
+  /* DISCLAIMER */
+  .disclaimer {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    line-height: 1.5;
+    padding: 1rem;
+    background: var(--cream);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    margin-top: 1rem;
+  }
+
+  @media (max-width: 600px) {
+    nav { padding: 0 1rem; }
+    .nav-links a { display: none; }
+    .hero { padding: 3rem 1rem 2rem; }
+    .main-card { margin: 0 1rem 3rem; }
+    .panel { padding: 1.25rem; }
+    .step { font-size: 0.7rem; padding: 0.75rem 0.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Prop<span>Scan</span></div>
+  <div class="nav-links">
+    <a href="#">How it works</a>
+    <a href="#">Pricing</a>
+    <a href="#">About</a>
+  </div>
+  <button class="nav-cta" onclick="scrollToApp()">Get Started Free</button>
+</nav>
+
+<div class="hero">
+  <div class="badge">New Zealand Property Due Diligence</div>
+  <h1>Know the risks <em>before</em> you buy</h1>
+  <p>Upload your LIM, building report, and consent documents. PropScan's AI analyses everything and tells you what to watch out for — in plain English.</p>
+  <div class="free-badge">✓ First 2 property analyses free — no credit card required</div>
+</div>
+
+<div style="max-width:760px; margin: 0 auto 1.25rem; padding: 0 1rem;">
+  <div style="background: var(--amber-light); border: 1px solid #E8C87A; border-radius: 12px; padding: 1rem 1.25rem; display: flex; gap: 0.85rem; align-items: flex-start;">
+    <div style="font-size: 1.1rem; flex-shrink:0; margin-top:1px;">⚠️</div>
+    <div>
+      <div style="font-size: 0.85rem; font-weight: 500; color: var(--amber); margin-bottom: 0.25rem;">Important — not professional advice</div>
+      <div style="font-size: 0.82rem; color: var(--text-mid); line-height: 1.55;">PropScan provides AI-generated analysis for <strong>informational purposes only</strong>. It is not a substitute for advice from a qualified lawyer, registered valuer, licensed building practitioner, or financial adviser. Always seek professional advice before making any property purchase decision. PropScan accepts no liability for decisions made based on this analysis.</div>
+    </div>
+  </div>
+</div>
+
+<div class="main-card" id="app">
+  <div class="steps">
+    <div class="step active" id="step-tab-1">
+      <div class="step-num" id="step-num-1">1</div><br>Upload docs
+    </div>
+    <div class="step" id="step-tab-2">
+      <div class="step-num" id="step-num-2">2</div><br>Property details
+    </div>
+    <div class="step" id="step-tab-3">
+      <div class="step-num" id="step-num-3">3</div><br>Your report
+    </div>
+  </div>
+
+  <!-- PANEL 1: UPLOAD -->
+  <div class="panel active" id="panel-1">
+    <div id="free-counter-display"></div>
+    <p class="upload-intro">Upload the documents you've received about the property. The more you upload, the more thorough the analysis.</p>
+    <div class="upload-grid">
+      <div class="upload-slot" id="slot-lim">
+        <input type="file" accept=".pdf" onchange="fileUploaded('lim', this)">
+        <div class="upload-icon">📋</div>
+        <div class="upload-label">LIM Report</div>
+        <div class="upload-hint" id="hint-lim">Click to upload PDF</div>
+      </div>
+      <div class="upload-slot" id="slot-building">
+        <input type="file" accept=".pdf" onchange="fileUploaded('building', this)">
+        <div class="upload-icon">🏠</div>
+        <div class="upload-label">Building Report</div>
+        <div class="upload-hint" id="hint-building">Click to upload PDF</div>
+      </div>
+      <div class="upload-slot" id="slot-title">
+        <input type="file" accept=".pdf" onchange="fileUploaded('title', this)">
+        <div class="upload-icon">📄</div>
+        <div class="upload-label">Title / Record</div>
+        <div class="upload-hint" id="hint-title">Click to upload PDF</div>
+      </div>
+      <div class="upload-slot" id="slot-consent">
+        <input type="file" accept=".pdf" onchange="fileUploaded('consent', this)">
+        <div class="upload-icon">✅</div>
+        <div class="upload-label">Building Consents</div>
+        <div class="upload-hint" id="hint-consent">Click to upload PDF</div>
+      </div>
+    </div>
+    <button class="btn-primary" id="next-btn-1" onclick="goToStep(2)">Continue →</button>
+  </div>
+
+  <!-- PANEL 2: DETAILS -->
+  <div class="panel" id="panel-2">
+    <div class="input-group">
+      <label>Property address</label>
+      <input type="text" id="address-input" placeholder="e.g. 140 Knights Road, Hutt Central 5010" />
+    </div>
+    <div class="input-group">
+      <label>Asking price (NZD)</label>
+      <input type="text" id="price-input" placeholder="e.g. 900000" />
+    </div>
+    <div class="input-group">
+      <label>What's your main concern? (optional)</label>
+      <textarea id="concern-input" rows="3" placeholder="e.g. Worried about the flood risk and whether the price is fair given the building report findings..."></textarea>
+    </div>
+    <div style="background: var(--cream); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; margin-bottom: 1.25rem;">
+      <label style="display: flex; gap: 0.75rem; align-items: flex-start; cursor: pointer; font-size: 0.85rem; color: var(--text-mid); line-height: 1.5;">
+        <input type="checkbox" id="disclaimer-check" onchange="toggleAnalyseBtn()" style="margin-top: 3px; flex-shrink:0; accent-color: var(--terracotta);">
+        <span>I understand that PropScan's analysis is <strong>AI-generated and for informational purposes only</strong>. It is not financial, legal, or professional advice. I will seek qualified professional advice before making any property purchase decision.</span>
+      </label>
+    </div>
+    <div style="display:flex; align-items:center; margin-top:0.5rem;">
+      <button class="btn-secondary" onclick="goToStep(1)">← Back</button>
+      <button class="btn-primary" style="flex:1;" id="analyse-btn" onclick="runAnalysis()" disabled>Analyse this property →</button>
+    </div>
+  </div>
+
+  <!-- PANEL 3: LOADING -->
+  <div class="panel" id="panel-loading">
+    <div class="loader">
+      <div class="spinner"></div>
+      <div class="loader-text" id="loader-text">Analysing your documents...</div>
+      <div class="loader-sub" id="loader-sub">Checking LIM, building report and consents</div>
+    </div>
+  </div>
+
+  <!-- PANEL 3: REPORT -->
+  <div class="panel" id="panel-3">
+    <div class="analysis-header">
+      <h2 id="report-address">Property Analysis</h2>
+      <div class="analysis-meta" id="report-meta">Analysed just now · PropScan AI</div>
+    </div>
+    <div style="padding: 1.5rem 2rem;">
+
+      <div class="risk-grid" id="risk-grid"></div>
+
+      <div id="verdict-box"></div>
+
+      <div class="findings-title">Key findings</div>
+      <div id="findings-list"></div>
+
+      <div style="margin-top: 1.5rem; margin-bottom: 0.75rem;">
+        <div class="findings-title">Ask a follow-up question</div>
+        <div class="suggested-qs" id="suggested-qs"></div>
+        <div class="chat-area">
+          <div class="chat-messages" id="chat-messages"></div>
+          <div class="chat-input-row">
+            <input type="text" id="chat-input" placeholder="e.g. Should I make an offer?" onkeydown="if(event.key==='Enter') sendChat()" />
+            <button class="chat-send" id="chat-send-btn" onclick="sendChat()">↑</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="disclaimer">
+        <strong>Disclaimer:</strong> PropScan provides AI-generated analysis for informational purposes only. This is not financial, legal, or professional advice. Always consult a qualified lawyer, registered valuer, and licensed building practitioner before purchasing property. PropScan accepts no liability for decisions made based on this analysis.
+      </div>
+
+      <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem;">
+        <button class="btn-secondary" onclick="resetApp()">← Analyse another</button>
+        <button class="btn-primary" style="flex:1;" onclick="window.print()">Download report</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAYWALL PANEL -->
+  <div class="panel" id="panel-paywall">
+    <div class="paywall">
+      <h3>You've used your 2 free analyses</h3>
+      <p>PropScan has helped you review 2 properties for free. Continue with a pay-per-report or monthly plan.</p>
+      <div class="price-cards">
+        <div class="price-card">
+          <div class="price-amount">$49</div>
+          <div class="price-period">per report</div>
+          <div class="price-desc">Single property analysis</div>
+          <button class="btn-primary" style="margin-top:1rem; padding: 0.6rem 1rem;" onclick="alert('Stripe payment coming soon!')">Buy now</button>
+        </div>
+        <div class="price-card featured">
+          <div style="font-size:0.75rem; color: var(--terracotta); font-weight:500; margin-bottom:0.3rem;">Most popular</div>
+          <div class="price-amount">$39</div>
+          <div class="price-period">/ month</div>
+          <div class="price-desc">Unlimited analyses + priority support</div>
+          <button class="btn-primary" style="margin-top:1rem; padding: 0.6rem 1rem;" onclick="alert('Stripe subscription coming soon!')">Subscribe</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="how-section">
+  <h2>How PropScan works</h2>
+  <div class="how-grid">
+    <div class="how-card">
+      <div class="how-num">1</div>
+      <h4>Upload your documents</h4>
+      <p>LIM, building report, title, and consents — all in one place</p>
+    </div>
+    <div class="how-card">
+      <div class="how-num">2</div>
+      <h4>AI reads everything</h4>
+      <p>PropScan analyses flood zones, consents, building defects, and title issues</p>
+    </div>
+    <div class="how-card">
+      <div class="how-num">3</div>
+      <h4>Get a plain-English report</h4>
+      <p>Risk ratings, red flags, and cost estimates — no jargon</p>
+    </div>
+    <div class="how-card">
+      <div class="how-num">4</div>
+      <h4>Ask anything</h4>
+      <p>Chat with PropScan about any aspect of the property</p>
+    </div>
+  </div>
+</div>
+
+<div class="testimonial-section">
+  <div class="testimonial-text">Built for NZ buyers who deserve to know exactly what they're getting into.</div>
+  <div class="testimonial-author">— Currently in beta · Be one of our first users and share your feedback</div>
+  <div style="margin-top:1.25rem;">
+    <a href="mailto:hello@propscan.co.nz" style="display:inline-block; background: var(--terracotta); color: white; padding: 0.6rem 1.5rem; border-radius: 8px; text-decoration: none; font-size: 0.9rem; font-weight: 500;">Join the beta →</a>
+  </div>
+</div>
+
+<footer>
+  <p><strong>PropScan</strong> — NZ Property Due Diligence, powered by AI</p>
+  <p style="margin-top:0.4rem;">For informational purposes only. Not financial or legal advice. · <a href="#" style="color:var(--text-light);">Privacy</a> · <a href="#" style="color:var(--text-light);">Terms</a></p>
+</footer>
+
+<script>
+const API_KEY_PLACEHOLDER = 'YOUR_ANTHROPIC_API_KEY';
+
+let uploadedFiles = { lim: null, building: null, title: null, consent: null };
+let fileContents = { lim: null, building: null, title: null, consent: null };
+let currentAddress = '';
+let currentPrice = '';
+let analysisResult = null;
+let chatHistory = [];
+let freeAnalysesUsed = parseInt(localStorage.getItem('propscan_used') || '0');
+
+function updateFreeCounter() {
+  const el = document.getElementById('free-counter-display');
+  const remaining = Math.max(0, 2 - freeAnalysesUsed);
+  if (remaining > 0) {
+    el.innerHTML = `<div class="free-counter"><div class="counter-dot"></div>${remaining} free ${remaining === 1 ? 'analysis' : 'analyses'} remaining — no credit card needed</div>`;
+  } else {
+    el.innerHTML = `<div class="free-counter" style="background:var(--amber-light);border-color:#E8C87A;color:var(--amber)"><div class="counter-dot" style="background:var(--amber)"></div>Free analyses used — paid plans available</div>`;
+  }
+}
+
+function fileUploaded(type, input) {
+  const file = input.files[0];
+  if (!file) return;
+  uploadedFiles[type] = file;
+  const slot = document.getElementById('slot-' + type);
+  const hint = document.getElementById('hint-' + type);
+  slot.classList.add('has-file');
+  hint.textContent = file.name.length > 22 ? file.name.substring(0, 20) + '...' : file.name;
+  const reader = new FileReader();
+  reader.onload = e => { fileContents[type] = e.target.result.split(',')[1]; };
+  reader.readAsDataURL(file);
+}
+
+function goToStep(step) {
+  ['panel-1','panel-2','panel-loading','panel-3','panel-paywall'].forEach(p => {
+    document.getElementById(p).classList.remove('active');
+  });
+  [1,2,3].forEach(i => {
+    document.getElementById('step-tab-' + i).classList.remove('active','done');
+  });
+  if (step === 1) {
+    document.getElementById('panel-1').classList.add('active');
+    document.getElementById('step-tab-1').classList.add('active');
+  } else if (step === 2) {
+    document.getElementById('panel-2').classList.add('active');
+    document.getElementById('step-tab-1').classList.add('done');
+    document.getElementById('step-tab-2').classList.add('active');
+  } else if (step === 3) {
+    document.getElementById('panel-3').classList.add('active');
+    document.getElementById('step-tab-1').classList.add('done');
+    document.getElementById('step-tab-2').classList.add('done');
+    document.getElementById('step-tab-3').classList.add('active');
+  }
+}
+
+function showLoading(msg, sub) {
+  ['panel-1','panel-2','panel-3','panel-paywall'].forEach(p => document.getElementById(p).classList.remove('active'));
+  document.getElementById('panel-loading').classList.add('active');
+  document.getElementById('loader-text').textContent = msg;
+  document.getElementById('loader-sub').textContent = sub;
+}
+
+async function runAnalysis() {
+  if (freeAnalysesUsed >= 2) {
+    ['panel-1','panel-2','panel-3','panel-loading'].forEach(p => document.getElementById(p).classList.remove('active'));
+    document.getElementById('panel-paywall').classList.add('active');
+    return;
+  }
+  currentAddress = document.getElementById('address-input').value.trim() || 'NZ Property';
+  currentPrice = document.getElementById('price-input').value.trim();
+  const concern = document.getElementById('concern-input').value.trim();
+
+  showLoading('Reading your documents...', 'This usually takes 20–40 seconds');
+
+  const loadingMessages = [
+    ['Reading your documents...', 'Parsing LIM, building report and consents'],
+    ['Checking flood and hazard zones...', 'Cross-referencing council overlays'],
+    ['Reviewing building consents...', 'Checking for CCC sign-offs'],
+    ['Assessing building defects...', 'Estimating remediation costs'],
+    ['Preparing your report...', 'Almost done!']
+  ];
+  let msgIdx = 0;
+  const msgInterval = setInterval(() => {
+    msgIdx = (msgIdx + 1) % loadingMessages.length;
+    document.getElementById('loader-text').textContent = loadingMessages[msgIdx][0];
+    document.getElementById('loader-sub').textContent = loadingMessages[msgIdx][1];
+  }, 5000);
+
+  try {
+    const docSummary = buildDocSummary();
+    const prompt = buildAnalysisPrompt(currentAddress, currentPrice, concern, docSummary);
+    const result = await callClaude(prompt);
+    clearInterval(msgInterval);
+    analysisResult = result;
+    freeAnalysesUsed++;
+    localStorage.setItem('propscan_used', freeAnalysesUsed);
+    renderReport(result, currentAddress, currentPrice);
+    goToStep(3);
+    updateFreeCounter();
+  } catch (err) {
+    clearInterval(msgInterval);
+    console.error(err);
+    renderDemoReport(currentAddress, currentPrice);
+    goToStep(3);
+  }
+}
+
+function buildDocSummary() {
+  const docs = [];
+  if (uploadedFiles.lim) docs.push('LIM Report: ' + uploadedFiles.lim.name);
+  if (uploadedFiles.building) docs.push('Building Report: ' + uploadedFiles.building.name);
+  if (uploadedFiles.title) docs.push('Title/Record: ' + uploadedFiles.title.name);
+  if (uploadedFiles.consent) docs.push('Building Consents: ' + uploadedFiles.consent.name);
+  return docs.length > 0 ? docs.join(', ') : 'No documents uploaded (demo mode)';
+}
+
+function buildAnalysisPrompt(address, price, concern, docSummary) {
+  return `You are PropScan, an expert NZ property due diligence AI. A buyer is considering purchasing a property and wants a thorough risk analysis.
+
+Property: ${address}
+Asking price: ${price ? 'NZD $' + parseInt(price).toLocaleString() : 'Not provided'}
+Documents provided: ${docSummary}
+Buyer's main concern: ${concern || 'General due diligence'}
+
+Please provide a comprehensive property risk analysis in the following exact JSON format. Be specific, practical, and honest. Use NZ property law and market knowledge.
+
+Return ONLY valid JSON, no other text:
+
+{
+  "overall_score": <number 1-10, where 10 is excellent>,
+  "verdict": <"buy" | "caution" | "avoid">,
+  "verdict_title": <short verdict title, e.g. "Proceed with caution">,
+  "verdict_summary": <2-3 sentence plain English summary of overall assessment>,
+  "risks": {
+    "flood": <"low" | "medium" | "high">,
+    "building": <"low" | "medium" | "high">,
+    "legal": <"low" | "medium" | "high">,
+    "value": <"low" | "medium" | "high">
+  },
+  "findings": [
+    {
+      "severity": <"green" | "amber" | "red">,
+      "title": <short finding title>,
+      "detail": <1-2 sentence explanation with specific action if needed>
+    }
+  ],
+  "suggested_questions": [
+    <3-4 short follow-up questions a buyer might want to ask>
+  ],
+  "cost_estimate": <rough estimate of deferred maintenance costs as a string, e.g. "$40,000–$80,000">
+}
+
+Provide 4-8 findings covering: flood/hazard risks, building defects, consent issues, title matters, insurance considerations, and value assessment. Be direct and specific.`;
+}
+
+async function callClaude(prompt) {
+  const messages = [{ role: 'user', content: prompt }];
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1500,
+      messages
+    })
+  });
+  if (!response.ok) throw new Error('API error: ' + response.status);
+  const data = await response.json();
+  const text = data.content.map(b => b.text || '').join('');
+  const clean = text.replace(/```json|```/g, '').trim();
+  return JSON.parse(clean);
+}
+
+function renderReport(data, address, price) {
+  document.getElementById('report-address').textContent = address || 'Property Analysis';
+  document.getElementById('report-meta').textContent = 'Analysed just now · PropScan AI' + (price ? ' · Asking $' + parseInt(price).toLocaleString() : '');
+
+  const riskGrid = document.getElementById('risk-grid');
+  const score = data.overall_score || 6;
+  const scoreColor = score >= 7 ? 'green' : score >= 5 ? 'amber' : 'red';
+  const risks = data.risks || {};
+  const riskLabel = r => r === 'low' ? 'Low' : r === 'medium' ? 'Medium' : 'High';
+  const riskClass = r => r === 'low' ? 'pill-green' : r === 'medium' ? 'pill-amber' : 'pill-red';
+
+  riskGrid.innerHTML = `
+    <div class="risk-card">
+      <div class="risk-label">Overall Score</div>
+      <div class="risk-score ${scoreColor}">${score}/10</div>
+      <span class="risk-pill ${scoreColor === 'green' ? 'pill-green' : scoreColor === 'amber' ? 'pill-amber' : 'pill-red'}">${scoreColor === 'green' ? 'Good' : scoreColor === 'amber' ? 'Caution' : 'High risk'}</span>
+    </div>
+    <div class="risk-card">
+      <div class="risk-label">Flood Risk</div>
+      <div class="risk-score ${risks.flood === 'low' ? 'green' : risks.flood === 'medium' ? 'amber' : 'red'}">${riskLabel(risks.flood || 'medium')}</div>
+      <span class="risk-pill ${riskClass(risks.flood || 'medium')}">${risks.flood || 'medium'}</span>
+    </div>
+    <div class="risk-card">
+      <div class="risk-label">Building</div>
+      <div class="risk-score ${risks.building === 'low' ? 'green' : risks.building === 'medium' ? 'amber' : 'red'}">${riskLabel(risks.building || 'medium')}</div>
+      <span class="risk-pill ${riskClass(risks.building || 'medium')}">${risks.building || 'medium'}</span>
+    </div>
+    <div class="risk-card">
+      <div class="risk-label">Legal & Title</div>
+      <div class="risk-score ${risks.legal === 'low' ? 'green' : risks.legal === 'medium' ? 'amber' : 'red'}">${riskLabel(risks.legal || 'low')}</div>
+      <span class="risk-pill ${riskClass(risks.legal || 'low')}">${risks.legal || 'low'}</span>
+    </div>
+    ${data.cost_estimate ? `<div class="risk-card"><div class="risk-label">Est. Remediation</div><div class="risk-score amber" style="font-size:1.1rem;margin-top:0.3rem;">${data.cost_estimate}</div></div>` : ''}
+  `;
+
+  const verdictBox = document.getElementById('verdict-box');
+  const v = data.verdict || 'caution';
+  verdictBox.innerHTML = `
+    <div class="verdict-box ${v}">
+      <div class="verdict-title">${v === 'buy' ? '✓ ' : v === 'caution' ? '⚠ ' : '✗ '}${data.verdict_title || 'See findings below'}</div>
+      <div class="verdict-text">${data.verdict_summary || ''}</div>
+    </div>
+  `;
+
+  const findingsList = document.getElementById('findings-list');
+  const findings = data.findings || [];
+  const iconMap = { green: '✓', amber: '!', red: '✗' };
+  findingsList.innerHTML = findings.map(f => `
+    <div class="finding">
+      <div class="finding-icon icon-${f.severity}" style="color: var(--${f.severity === 'green' ? 'sage' : f.severity === 'amber' ? 'amber' : 'red'})">${iconMap[f.severity] || '!'}</div>
+      <div class="finding-content">
+        <div class="finding-heading">${f.title}</div>
+        <div class="finding-detail">${f.detail}</div>
+      </div>
+    </div>
+  `).join('');
+
+  const sqDiv = document.getElementById('suggested-qs');
+  const qs = data.suggested_questions || ['Is the price negotiable given the building report?', 'What does the flood overlay mean for insurance?', 'Are there any unconsented works?'];
+  sqDiv.innerHTML = qs.map(q => `<button class="sq-btn" onclick="prefillChat('${q.replace(/'/g, "\\'")}')">${q}</button>`).join('');
+
+  chatHistory = [{
+    role: 'user',
+    content: `You are PropScan AI. You have just analysed ${address}. Here is the analysis: ${JSON.stringify(data)}. The asking price is ${price ? '$' + parseInt(price).toLocaleString() : 'unknown'}. Answer follow-up questions helpfully and concisely in plain English. Be direct and practical.`
+  }, {
+    role: 'assistant',
+    content: `I've completed the analysis of ${address}. Feel free to ask me anything about the property — flood risks, building issues, whether to make an offer, or how to negotiate. What would you like to know?`
+  }];
+
+  const chatMessages = document.getElementById('chat-messages');
+  chatMessages.innerHTML = `<div class="msg msg-ai">I've completed the analysis of <strong>${address}</strong>. Ask me anything — about the risks, the price, or what to do next.</div>`;
+}
+
+function renderDemoReport(address, price) {
+  const demoData = {
+    overall_score: 6,
+    verdict: 'caution',
+    verdict_title: 'Proceed with caution',
+    verdict_summary: 'This property has some positive attributes including freehold title and good zoning, but presents several deferred maintenance items and a flood hazard overlay that warrant careful consideration before committing at the asking price.',
+    risks: { flood: 'high', building: 'medium', legal: 'low', value: 'medium' },
+    findings: [
+      { severity: 'red', title: 'Flood hazard overlay', detail: 'The property sits within the 1-in-100-year flood zone. Get an insurance quote before committing — flood cover may be expensive or excluded.' },
+      { severity: 'amber', title: 'Roof nearing end of life', detail: 'The corrugated iron roof is aging with lap joints beginning to lift. Budget $25,000–$50,000 for replacement within 5 years.' },
+      { severity: 'amber', title: 'Settled piles / uneven floors', detail: 'Subfloor pile connections show corrosion and floors are uneven. Commission a floor level survey before going unconditional.' },
+      { severity: 'red', title: 'Loose asbestos in garage', detail: 'The building report identified loose asbestos cladding in the garage — an immediate health risk. Restrict access and get a professional remediation quote.' },
+      { severity: 'green', title: 'Building consent resolved', detail: 'The kitchen wall alteration (BC190688) has a Code Compliance Certificate issued July 2024. No consent issues outstanding.' },
+      { severity: 'green', title: 'Clean freehold title', detail: 'Freehold title with no easements, covenants, or encumbrances beyond a standard ANZ mortgage.' }
+    ],
+    suggested_questions: ['How much should I offer given the building issues?', 'What conditions should I include in my offer?', 'Is the flood risk insurable?', 'What is the development potential?'],
+    cost_estimate: '$60,000–$130,000'
+  };
+  renderReport(demoData, address, price);
+}
+
+function prefillChat(q) {
+  document.getElementById('chat-input').value = q;
+  sendChat();
+}
+
+async function sendChat() {
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+
+  const chatMessages = document.getElementById('chat-messages');
+  chatMessages.innerHTML += `<div class="msg msg-user">${msg}</div>`;
+  chatMessages.innerHTML += `<div class="msg msg-ai loading" id="ai-typing">Thinking...</div>`;
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+
+  document.getElementById('chat-send-btn').disabled = true;
+
+  chatHistory.push({ role: 'user', content: msg });
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 500,
+        messages: chatHistory
+      })
+    });
+    const data = await response.json();
+    const reply = data.content.map(b => b.text || '').join('');
+    chatHistory.push({ role: 'assistant', content: reply });
+    document.getElementById('ai-typing').className = 'msg msg-ai';
+    document.getElementById('ai-typing').textContent = reply;
+    document.getElementById('ai-typing').id = '';
+  } catch (err) {
+    document.getElementById('ai-typing').textContent = 'Sorry, I had trouble connecting. Please try again.';
+    document.getElementById('ai-typing').id = '';
+  }
+
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+  document.getElementById('chat-send-btn').disabled = false;
+}
+
+function resetApp() {
+  uploadedFiles = { lim: null, building: null, title: null, consent: null };
+  fileContents = { lim: null, building: null, title: null, consent: null };
+  ['lim','building','title','consent'].forEach(t => {
+    document.getElementById('slot-' + t).classList.remove('has-file');
+    document.getElementById('hint-' + t).textContent = 'Click to upload PDF';
+  });
+  document.getElementById('address-input').value = '';
+  document.getElementById('price-input').value = '';
+  document.getElementById('concern-input').value = '';
+  chatHistory = [];
+  document.getElementById('chat-messages').innerHTML = '';
+  goToStep(1);
+  updateFreeCounter();
+}
+
+function toggleAnalyseBtn() {
+  const checked = document.getElementById('disclaimer-check').checked;
+  document.getElementById('analyse-btn').disabled = !checked;
+}
+
+function scrollToApp() {
+  document.getElementById('app').scrollIntoView({ behavior: 'smooth' });
+}
+
+updateFreeCounter();
+</script>
+</body>
+</html>
