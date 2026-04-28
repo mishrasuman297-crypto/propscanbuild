@@ -1,14 +1,10 @@
 const handler = async (event) => {
   if (event.httpMethod !== 'POST') {
-    return {
-      statusCode: 405,
-      body: 'Method Not Allowed'
-    };
+    return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
   try {
     const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
-    
     if (!ANTHROPIC_API_KEY) {
       return {
         statusCode: 500,
@@ -23,11 +19,12 @@ const handler = async (event) => {
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01'
+        'anthropic-version': '2023-06-01',
+        'anthropic-beta': 'pdfs-2024-09-25'
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-5',
-        max_tokens: max_tokens || 1500,
+        max_tokens: max_tokens || 2000,
         messages
       })
     });
