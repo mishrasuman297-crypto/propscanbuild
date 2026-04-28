@@ -887,8 +887,7 @@ async function runAnalysis() {
   }, 5000);
 
   try {
-    const docSummary = buildDocSummary();
-    const prompt = buildAnalysisPrompt(currentAddress, currentPrice, concern, docSummary);
+    const prompt = buildAnalysisPrompt(currentAddress, currentPrice, concern);
     const result = await callClaude(prompt);
     clearInterval(msgInterval);
     analysisResult = result;
@@ -907,32 +906,28 @@ async function runAnalysis() {
   }
 }
 
-function buildDocSummary() {
-  const docs = [];
-  if (uploadedFiles.lim) docs.push('LIM Report: ' + uploadedFiles.lim.name);
-  if (uploadedFiles.building) docs.push('Building Report: ' + uploadedFiles.building.name);
-  if (uploadedFiles.title) docs.push('Title/Record: ' + uploadedFiles.title.name);
-  if (uploadedFiles.consent) docs.push('Building Consents: ' + uploadedFiles.consent.name);
-  return docs.length > 0 ? docs.join(', ') : 'No documents uploaded (demo mode)';
-}
+function buildAnalysisPrompt(address, price, concern) {
+  const hasAnyDoc = uploadedFiles.lim || uploadedFiles.building || uploadedFiles.title || uploadedFiles.consent;
+  return `You are PropScan, an expert NZ property due diligence AI. ${hasAnyDoc ? 'You have been given the actual property documents attached. Read them carefully and base ALL findings ONLY on what is written in those documents. Do NOT invent issues not present in the documents.' : 'No documents were uploaded — provide a general risk framework only and clearly state no documents were provided.'}
 
-function buildAnalysisPrompt(address, price, concern, docSummary) {
-  return `You are PropScan, an expert NZ property due diligence AI. A buyer is considering purchasing a property and wants a thorough risk analysis.
-
-Property: ${address}
+Property address: ${address}
 Asking price: ${price ? 'NZD $' + parseInt(price).toLocaleString() : 'Not provided'}
-Documents provided: ${docSummary}
-Buyer's main concern: ${concern || 'General due diligence'}
+Buyer concern: ${concern || 'General due diligence'}
 
-Please provide a comprehensive property risk analysis in the following exact JSON format. Be specific, practical, and honest. Use NZ property law and market knowledge.
+CRITICAL RULES:
+- ONLY report findings actually found in the uploaded documents
+- Do NOT make up defects or risks not mentioned in the documents
+- If building report shows no roof issues, do not mention roof issues
+- Reference specific document findings in your detail fields
+- Be accurate, specific and helpful
 
 Return ONLY valid JSON, no other text:
 
 {
   "overall_score": <number 1-10, where 10 is excellent>,
   "verdict": <"buy" | "caution" | "avoid">,
-  "verdict_title": <short verdict title, e.g. "Proceed with caution">,
-  "verdict_summary": <2-3 sentence plain English summary of overall assessment>,
+  "verdict_title": <short verdict title>,
+  "verdict_summary": <2-3 sentence summary based ONLY on actual document content>,
   "risks": {
     "flood": <"low" | "medium" | "high">,
     "building": <"low" | "medium" | "high">,
@@ -943,34 +938,62 @@ Return ONLY valid JSON, no other text:
     {
       "severity": <"green" | "amber" | "red">,
       "title": <short finding title>,
-      "detail": <1-2 sentence explanation with specific action if needed>
+      "detail": <1-2 sentences referencing actual document content>
     }
   ],
   "suggested_questions": [
-    <3-4 short follow-up questions a buyer might want to ask>
+    <3-4 follow-up questions based on actual findings>
   ],
-  "cost_estimate": <rough estimate of deferred maintenance costs as a string, e.g. "$40,000–$80,000">
-}
-
-Provide 4-8 findings covering: flood/hazard risks, building defects, consent issues, title matters, insurance considerations, and value assessment. Be direct and specific.`;
+  "cost_estimate": <estimate based only on issues found, or "No building report provided">
+}`;
 }
 
 async function callClaude(prompt) {
-  const messages = [{ role: 'user', content: prompt }];
+  // Build message content with actual PDF documents
+  const content = [];
+
+  // Attach each uploaded PDF as a real document
+  const docTypes = [
+    { key: 'lim', label: 'LIM Report' },
+    { key: 'building', label: 'Building Report' },
+    { key: 'title', label: 'Title / Record of Title' },
+    { key: 'consent', label: 'Building Consent Documents' }
+  ];
+
+  for (const doc of docTypes) {
+    if (fileContents[doc.key]) {
+      content.push({
+        type: 'document',
+        source: {
+          type: 'base64',
+          media_type: 'application/pdf',
+          data: fileContents[doc.key]
+        },
+        title: doc.label
+      });
+    }
+  }
+
+  // Add the analysis prompt
+  content.push({ type: 'text', text: prompt });
+
+  const messages = [{ role: 'user', content }];
+
   const response = await fetch(API_ENDPOINT, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ messages, max_tokens: 1500 })
+    body: JSON.stringify({ messages, max_tokens: 2000 })
   });
+
   if (!response.ok) throw new Error('API error: ' + response.status);
   const data = await response.json();
-  console.log('API response:', JSON.stringify(data));
   if (data.error) throw new Error('Claude error: ' + JSON.stringify(data.error));
-  if (!data.content) throw new Error('No content in response: ' + JSON.stringify(data));
+  if (!data.content) throw new Error('No content in response');
   const text = data.content.map(b => b.text || '').join('');
   const clean = text.replace(/```json|```/g, '').trim();
   return JSON.parse(clean);
 }
+
 function renderReport(data, address, price) {
   document.getElementById('report-address').textContent = address || 'Property Analysis';
   document.getElementById('report-meta').textContent = 'Analysed just now · PropScan AI' + (price ? ' · Asking $' + parseInt(price).toLocaleString() : '');
